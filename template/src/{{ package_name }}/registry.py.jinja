@@ -1,0 +1,15 @@
+from collections.abc import Callable
+
+from {{ package_name }}.tools.echo import echo
+
+Tool = Callable[..., str]
+
+TOOLS: dict[str, Tool] = {
+    "echo": echo,
+}
+
+
+def register(name: str, fn: Tool) -> None:
+    if name in TOOLS:
+        raise ValueError(f"tool already registered: {name}")
+    TOOLS[name] = fn

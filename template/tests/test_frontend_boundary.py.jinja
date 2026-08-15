@@ -1,0 +1,23 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_frontend_talks_http_not_the_database() -> None:
+    client = ROOT / "frontend" / "src" / "api.ts"
+    assert client.is_file()
+    text = client.read_text(encoding="utf-8")
+    assert "/health" in text
+    assert "/hello" in text
+    forbidden = ("psycopg", "sqlalchemy", "postgres://", "postgresql://", "DATABASE_URL")
+    for path in (ROOT / "frontend").rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in {".ts", ".js", ".tsx", ".jsx", ".html"}:
+            continue
+        body = path.read_text(encoding="utf-8")
+        for token in forbidden:
+            assert token not in body, f"{path} contains {token}"
+
+
+def test_agents_map_forbids_frontend_database_access() -> None:
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert "frontend/src/api.ts" in text

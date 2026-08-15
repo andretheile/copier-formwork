@@ -1,0 +1,2 @@
+# Replay fixtures for agent evals. Add JSONL or golden files here; keep this folder.
+# PR gate stays `just check` (unit + architecture). Run `just eval` for this directory.

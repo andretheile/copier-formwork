@@ -1,0 +1,14 @@
+from pathlib import Path
+
+from {{ package_name }}.registry import TOOLS
+
+TESTS = Path(__file__).resolve().parent
+
+
+def test_registry_is_not_empty() -> None:
+    assert TOOLS, "Register at least one tool; do not invent a second folder."
+
+
+def test_every_tool_has_a_test_module() -> None:
+    missing = [name for name in TOOLS if not (TESTS / f"test_tool_{name}.py").is_file()]
+    assert missing == [], f"Add tests/test_tool_<name>.py for: {missing}"

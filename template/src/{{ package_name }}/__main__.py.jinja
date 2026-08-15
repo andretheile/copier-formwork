@@ -1,0 +1,12 @@
+from {{ package_name }}.agent import run
+
+
+def main() -> None:
+    import sys
+
+    query = " ".join(sys.argv[1:]) or "hello"
+    print(run(query))
+
+
+if __name__ == "__main__":
+    main()

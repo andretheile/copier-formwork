@@ -1,0 +1,12 @@
+from {{ package_name }}.registry import TOOLS
+
+
+def run(query: str) -> str:
+    """Minimal dispatch: `tool_name: argument` or a plain echo."""
+    if ": " in query:
+        name, rest = query.split(": ", 1)
+        tool = TOOLS.get(name)
+        if tool is None:
+            return f"unknown tool: {name}"
+        return tool(rest)
+    return TOOLS["echo"](query)

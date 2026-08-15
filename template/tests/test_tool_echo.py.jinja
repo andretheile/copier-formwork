@@ -1,0 +1,5 @@
+from {{ package_name }}.tools.echo import echo
+
+
+def test_echo() -> None:
+    assert echo("ping") == "ping"

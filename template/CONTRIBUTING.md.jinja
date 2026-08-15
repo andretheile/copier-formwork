@@ -1,0 +1,17 @@
+# Contributing
+
+Same rules as `AGENTS.md` (humans and coding agents share this story).
+
+## Branching
+
+1. Update `{{ integration_branch }}` from the remote.
+2. Create `feat/…`, `fix/…`, or `chore/…` from that branch.
+3. Open a {{ 'merge request' if git_host == 'gitlab' else 'pull request' }} **into `{{ integration_branch }}`**.
+{% if integration_branch == 'dev' %}4. Releases are a separate MR from `dev` into `main`.
+{% endif %}
+
+Do not push commits directly to `main` or `{{ integration_branch }}`.
+
+## Checks
+
+Run `just check` locally. CI runs the same tools. Required checks must stay enabled on the host (protect `main`{% if integration_branch == 'dev' %} and `dev`{% endif %}; no direct push).

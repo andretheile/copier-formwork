@@ -1,0 +1,11 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_compose_runs_postgres_behind_the_api() -> None:
+    compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    assert "postgres:" in compose
+    assert "DATABASE_URL" in compose
+    env_example = (ROOT / ".env.example").read_text(encoding="utf-8")
+    assert "DATABASE_URL=" in env_example

@@ -1,0 +1,31 @@
+# Context
+
+Living picture. Update in the same change as a new actor or external system.
+
+```mermaid
+flowchart LR
+  {% if kind == 'service' %}
+  user[User]
+  {% if frontend == 'vite' %}
+  web[frontend SPA]
+  api["{{ project_name }} API"]
+  user --> web
+  web -->|"HTTP /api"| api
+  {% else %}
+  api["{{ project_name }} HTTP"]
+  user --> api
+  {% endif %}
+  {% if database == 'postgres' %}
+  db[(PostgreSQL)]
+  api --> db
+  {% endif %}
+  {% elif kind == 'agent' %}
+  user[User]
+  agent["{{ project_name }} agent"]
+  user --> agent
+  {% else %}
+  caller[Caller]
+  lib["{{ project_name }} library"]
+  caller --> lib
+  {% endif %}
+```

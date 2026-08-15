@@ -1,0 +1,3 @@
+# Flows
+
+Add one markdown file per use case (`example.md`) with a sequence mermaid. Do not dump new flows into `runtime.md`.

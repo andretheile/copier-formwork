@@ -1,0 +1,8 @@
+"""{{ description }}"""
+
+{% if kind == 'service' %}from {{ package_name }}.domain.hello import hello
+{%- else %}from {{ package_name }}.hello import hello{% endif %}
+
+__version__ = "0.1.0"
+
+__all__ = ["__version__", "hello"]

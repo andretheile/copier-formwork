@@ -1,0 +1,49 @@
+:root {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: #1c1914;
+  background: #f4f1ea;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 40rem;
+  margin: 3rem auto;
+  padding: 0 1.25rem;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+input,
+button,
+pre {
+  font: inherit;
+}
+
+input,
+pre {
+  border: 1px solid #d9d2c5;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  background: #fffdf8;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  background: #1f5c4d;
+  color: #f7fffb;
+  cursor: pointer;
+}

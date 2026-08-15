@@ -1,0 +1,44 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+      {%- if database == 'postgres' %}
+      DATABASE_URL: postgresql://app:app@db:5432/{{ package_name }}
+      {%- endif %}
+    {%- if database == 'postgres' %}
+    depends_on:
+      db:
+        condition: service_healthy
+    {%- endif %}
+{% if frontend == 'vite' %}
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+{% endif %}
+{% if database == 'postgres' %}
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: {{ package_name }}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d {{ package_name }}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+{% endif %}
+{% if database == 'postgres' %}
+volumes:
+  pgdata:
+{% endif %}

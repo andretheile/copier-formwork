@@ -1,0 +1,94 @@
+# AGENTS.md
+
+This file is the map for Cursor, Codex, and other AGENTS.md-aware tools. Claude Code: `CLAUDE.md` imports this file.
+
+## Commands
+
+- `just check` — format, lint, tests. This **is** the PR gate. Do not invent a second runner.
+- `just test` — pytest only
+- `just fmt` — apply ruff
+{% if kind == 'service' %}
+- `just up` — `docker compose up --build` (API{% if frontend == 'vite' %}, web{% endif %}{% if database == 'postgres' %}, Postgres{% endif %})
+{% if frontend == 'vite' %}
+- `just web` — Vite dev server (proxies `/api` to FastAPI on port 8000)
+{% endif %}
+{% endif %}
+{% if evals != 'off' %}
+- `just eval` — evaluation tests under `tests/evals/`
+{% endif %}
+
+If `just` is missing: `uv run ruff format --check src tests && uv run ruff check src tests && uv run pytest`
+
+## Layout
+
+{% if kind == 'service' %}
+- `src/{{ package_name }}/api.py` — composition root: CORS, include routers. No route handlers.
+- `src/{{ package_name }}/domain/` — product rules. No FastAPI, no database drivers.
+- `src/{{ package_name }}/adapters/http/` — HTTP only. Calls domain. No SQL.
+{% if database == 'postgres' %}
+- `src/{{ package_name }}/adapters/postgres/` — the only package that uses `DATABASE_URL`
+{% endif %}
+{% if frontend == 'vite' %}
+- `frontend/` — browser app. HTTP only, via `frontend/src/api.ts`
+{% endif %}
+{% else %}
+- `src/{{ package_name }}/` — all runtime code
+{% endif %}
+- `tests/` — unit, architecture, and registry tests
+- `docs/architecture/` — **only** place for living mermaid (context, runtime, data, flows)
+- `docs/decisions/` — ADRs; do not edit old mermaid to match new code
+- `docs/runbooks/` — how to run and recover, not architecture
+
+## Do not
+
+- Create `ARCHITECTURE.md` at the repo root
+- Put mermaid in `README.md` or this file
+- Push to `main` or `{{ integration_branch }}`
+- Open an MR/PR against `main` unless you are merging `dev` → `main`{% if integration_branch == 'main' %} (this repo integrates on main; still use a feature branch){% endif %}
+- Skip hooks, force-push shared branches, or commit `.env` / secrets
+- Add a second tools/agents folder; extend the registry
+{% if kind == 'service' %}
+- Import `adapters` from `domain` (dependencies point inward)
+- Put SQL or `DATABASE_URL` in HTTP adapters or the frontend
+- Add a new deployable microservice unless the human asked — grow a capability here first
+{% endif %}
+{% if frontend == 'vite' %}- Import Python from `frontend/`, or query Postgres (or any database) from the browser
+- Put `DATABASE_URL` or other connection strings in frontend code
+- Serve product HTML from FastAPI; keep `/docs` as the API explorer only
+{% endif %}{% if database == 'postgres' %}- Give the frontend a database driver or a connection string; the API is the only client of Postgres
+{% endif %}
+
+## Git
+
+Branch from `origin/{{ integration_branch }}`. Name branches `feat/`, `fix/`, or `chore/`. Open a {{ 'merge request' if git_host == 'gitlab' else 'pull request' }} with base **{{ integration_branch }}**. Do not merge it unless the human asked.
+
+{% if git_host == 'gitlab' %}
+```bash
+git checkout -b feat/short-name origin/{{ integration_branch }}
+git push -u origin HEAD
+glab mr create --target-branch {{ integration_branch }} --fill
+```
+{% else %}
+```bash
+git checkout -b feat/short-name origin/{{ integration_branch }}
+git push -u origin HEAD
+gh pr create --base {{ integration_branch }} --fill
+```
+{% endif %}
+
+## When you change code
+
+- Models or events → update `docs/architecture/data.md` in the same PR
+- New process, worker, or service → `docs/architecture/runtime.md`
+- New actor or external API → `docs/architecture/context.md`
+{% if kind == 'service' %}
+- New product capability → `domain/<name>.py` + `adapters/http/<name>.py`, then `include_router` in `adapters/http/router.py`
+{% endif %}
+{% if kind != 'package' %}- New tool → register it in `src/{{ package_name }}/registry.py` and add `tests/test_tool_<name>.py`
+{% endif %}{% if frontend == 'vite' %}- New HTTP route → add it on FastAPI **and** a function in `frontend/src/api.ts` in the same PR
+{% endif %}{% if database == 'postgres' %}- Schema or stored shape → `adapters/postgres/` only; update `docs/architecture/data.md`
+{% endif %}- `just check` must pass before you stop
+
+## Definition of done
+
+`just check` is green. Architecture tests pass. Docs for the change are updated. The MR/PR targets `{{ integration_branch }}`.

@@ -1,0 +1,8 @@
+from fastapi import APIRouter
+
+from {{ package_name }}.adapters.http.health import router as health_router
+from {{ package_name }}.adapters.http.hello import router as hello_router
+
+router = APIRouter()
+router.include_router(health_router)
+router.include_router(hello_router)

@@ -1,0 +1,33 @@
+# Runbooks
+
+How to run, deploy, and recover. Not architecture.
+
+## Local
+
+```bash
+uv sync --extra dev
+just check
+```
+{% if kind == 'service' %}
+{% if frontend == 'vite' %}
+API and SPA without Compose (two terminals):
+
+```bash
+uv run uvicorn {{ package_name }}.api:app --reload
+just web
+```
+
+Vite proxies `/api` to `http://127.0.0.1:8000`. Open `http://127.0.0.1:5173`.
+{% endif %}
+
+Full stack:
+
+```bash
+just up
+```
+
+- API: `http://127.0.0.1:8000/health` and `/docs`
+{% if frontend == 'vite' %}- Web: `http://127.0.0.1:8080` (nginx proxies `/api` to the API)
+{% endif %}{% if database == 'postgres' %}- Postgres: `127.0.0.1:5432` (user `app`, database `{{ package_name }}`). Copy `.env.example` to `.env` for a local API outside Compose.
+{% endif %}
+{% endif %}

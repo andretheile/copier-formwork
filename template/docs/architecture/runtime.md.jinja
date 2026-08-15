@@ -1,0 +1,43 @@
+# Runtime
+
+Living picture. Update when you add a process, worker, or queue.
+
+```mermaid
+flowchart TB
+  {% if kind == 'service' %}
+  {% if frontend == 'vite' %}
+  browser[Browser]
+  web[Vite / nginx]
+  browser --> web
+  web -->|"HTTP /api"| http[adapters/http]
+  {% else %}
+  http[adapters/http]
+  {% endif %}
+  http --> domain[domain]
+  {% if database == 'postgres' %}
+  http --> ready[readiness]
+  ready --> pg[adapters/postgres]
+  pg --> db[(PostgreSQL)]
+  {% endif %}
+  {% elif kind == 'agent' %}
+  cli[CLI]
+  cli --> dispatch[run]
+  dispatch --> registry[TOOLS registry]
+  {% else %}
+  pkg["{{ package_name }}"]
+  pkg --> hello["hello()"]
+  {% endif %}
+```
+
+{% if kind == 'service' %}
+This is one API process (a modular monolith). Add a capability as `domain/` + `adapters/http/`. Do not add a new Compose service for a new feature unless the human asked.
+{% endif %}
+{% if kind != 'package' %}
+Tools and agents are registered in `src/{{ package_name }}/registry.py`. Do not add a sibling `src/tools/` package.
+{% endif %}
+{% if frontend == 'vite' %}
+The SPA lives in `frontend/`. FastAPI does not render it. Compose (`web`) serves the built assets and proxies `/api` to `api`.
+{% endif %}
+{% if database == 'postgres' %}
+Postgres is a Compose service. Only `adapters/postgres` uses `DATABASE_URL`.
+{% endif %}

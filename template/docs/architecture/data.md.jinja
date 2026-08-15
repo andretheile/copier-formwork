@@ -1,0 +1,27 @@
+# Data
+
+Living picture. Update when models or events change. This is the ER/data mermaid — not a root `ARCHITECTURE.md`.
+
+```mermaid
+flowchart LR
+  {% if kind == 'service' %}
+  {% if frontend == 'vite' %}
+  ui[frontend api.ts] --> http[adapters/http]
+  {% else %}
+  req[HTTP request] --> http[adapters/http]
+  {% endif %}
+  http --> domain[domain]
+  {% if database == 'postgres' %}
+  http --> pg[adapters/postgres]
+  pg --> db[(PostgreSQL)]
+  {% endif %}
+  {% elif kind == 'agent' %}
+  query[query string] --> tool[tool result]
+  {% else %}
+  name[name] --> greeting[greeting string]
+  {% endif %}
+```
+{% if database == 'postgres' %}
+
+`GET /health` is process liveness and does not need Postgres. `GET /ready` pings through `adapters/postgres`. Add tables in that adapter; do not model them in the frontend or in `domain/`.
+{% endif %}

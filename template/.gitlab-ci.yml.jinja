@@ -1,0 +1,30 @@
+stages: [check, gate]
+
+check:
+  stage: check
+  image: python:{{ python_version }}-bookworm-slim
+  before_script:
+    - pip install --quiet uv
+  script:
+    - uv sync --extra dev
+    - uv run ruff format --check src tests
+    - uv run ruff check src tests
+    - uv run pytest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "{{ integration_branch }}"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+target-branch:
+  stage: gate
+  image: python:{{ python_version }}-bookworm-slim
+  script:
+    - |
+      set -euo pipefail
+      integration="{{ integration_branch }}"
+      if [ "$integration" = "dev" ] && [ "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-}" = "main" ] && [ "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-}" != "dev" ]; then
+        echo "Open this merge request against dev, not main (unless merging dev into main)."
+        exit 1
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

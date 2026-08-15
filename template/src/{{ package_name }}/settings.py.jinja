@@ -1,0 +1,16 @@
+import os
+
+
+def cors_origins() -> list[str]:
+    raw = os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:8080",
+    )
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def is_ready() -> bool:
+{% if database == 'postgres' %}    from {{ package_name }}.adapters.postgres.ping import ping_database
+
+    return ping_database()
+{%- else %}    return True{% endif %}

@@ -1,0 +1,30 @@
+# 0001. Copier Formwork defaults
+
+## Status
+
+Accepted (generated).
+
+## Context
+
+The project was created from copier-formwork so coding agents start inside a fixed envelope: CI, tests, docs placement, git targeting `{{ integration_branch }}`{% if kind == 'service' %}, and a modular monolith (domain + adapters, not a microservice mesh){% endif %}.
+
+## Decision
+
+- Kind: `{{ kind }}`
+- Git host: `{{ git_host }}`
+- Integration branch: `{{ integration_branch }}`
+- Runtime: `{{ runtime }}`
+- Frontend: `{{ frontend }}`
+- Database: `{{ database }}`
+{% if kind == 'service' %}
+- Shape: modular monolith — `domain/` + `adapters/http/`{% if database == 'postgres' %} + `adapters/postgres/`{% endif %}; composition root `api.py`
+{% endif %}
+- Orchestration: `{{ orchestration }}`
+- Evals: `{{ evals }}`
+- Observability: `{{ observability }}`
+
+Living architecture lives in `docs/architecture/`. This ADR is not updated when the graph changes; add `0002-…` instead.
+
+## Consequences
+
+`just check` is the definition of done. Feature work uses a {{ 'merge request' if git_host == 'gitlab' else 'pull request' }} into `{{ integration_branch }}`.

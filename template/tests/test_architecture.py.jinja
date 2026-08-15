@@ -1,0 +1,22 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_no_root_architecture_markdown() -> None:
+    assert not (ROOT / "ARCHITECTURE.md").exists()
+
+
+def test_living_architecture_docs_exist() -> None:
+    folder = ROOT / "docs" / "architecture"
+    for name in ("context.md", "runtime.md", "data.md"):
+        path = folder / name
+        assert path.is_file(), path
+        text = path.read_text(encoding="utf-8")
+        assert "```mermaid" in text
+
+
+def test_agents_map_names_just_check() -> None:
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert "just check" in text
+    assert "docs/architecture/" in text

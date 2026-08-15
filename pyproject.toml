@@ -1,0 +1,72 @@
+[project]
+name = "copier-formwork"
+version = "0.1.0"
+description = "Copier templates with a mechanical architecture harness and a localhost wizard."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12"
+authors = [{ name = "Andre" }]
+keywords = ["copier", "template", "agents", "architecture"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "copier>=9.6.0",
+    "starlette>=0.41.0",
+    "uvicorn[standard]>=0.32.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/andretheile/copier-formwork"
+Repository = "https://github.com/andretheile/copier-formwork"
+
+[project.scripts]
+copier-formwork = "copier_formwork.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.27.0",
+    "pytest>=8.0.0",
+    "ruff>=0.7.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/copier_formwork"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"copier.yml" = "copier_formwork/copier.yml"
+"template" = "copier_formwork/template"
+"src/copier_formwork/static/wizard.html" = "copier_formwork/static/wizard.html"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/template",
+    "/copier.yml",
+    "/README.md",
+    "/LICENSE",
+    "/NOTICE",
+    "/tests",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore:Using `httpx` with `starlette.testclient`:DeprecationWarning",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

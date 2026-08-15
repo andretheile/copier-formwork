@@ -1,0 +1,10 @@
+from fastapi import APIRouter
+
+from {{ package_name }}.domain.hello import hello
+
+router = APIRouter()
+
+
+@router.get("/hello")
+def hello_route(name: str = "formwork") -> dict[str, str]:
+    return {"message": hello(name)}

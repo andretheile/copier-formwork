@@ -1,0 +1,48 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = next(
+    path for path in (ROOT / "src").iterdir() if path.is_dir() and not path.name.startswith(".")
+)
+
+DOMAIN = SRC / "domain"
+HTTP = SRC / "adapters" / "http"
+
+INFRA_IN_DOMAIN = ("fastapi", "starlette", "uvicorn", "psycopg", "sqlalchemy")
+DB_IN_HTTP = ("psycopg", "sqlalchemy", "postgres://", "postgresql://", "DATABASE_URL")
+
+
+def _python_files(folder: Path) -> list[Path]:
+    return [path for path in folder.rglob("*.py") if path.is_file()]
+
+
+def test_domain_exists() -> None:
+    assert (DOMAIN / "hello.py").is_file()
+    assert (HTTP / "router.py").is_file()
+    assert (SRC / "api.py").is_file()
+
+
+def test_composition_root_only_wires_routers() -> None:
+    text = (SRC / "api.py").read_text(encoding="utf-8")
+    assert "include_router" in text
+    assert "@app.get" not in text
+
+
+def test_domain_does_not_import_infrastructure() -> None:
+    for path in _python_files(DOMAIN):
+        body = path.read_text(encoding="utf-8")
+        for token in INFRA_IN_DOMAIN:
+            assert token not in body, f"{path} contains {token}"
+
+
+def test_http_adapters_do_not_talk_to_the_database() -> None:
+    for path in _python_files(HTTP):
+        body = path.read_text(encoding="utf-8")
+        for token in DB_IN_HTTP:
+            assert token not in body, f"{path} contains {token}"
+
+
+def test_agents_map_names_the_seams() -> None:
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert "domain/" in text
+    assert "adapters/http" in text

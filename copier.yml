@@ -1,0 +1,152 @@
+_subdirectory: template
+_min_copier_version: "9.6.0"
+_message_after_copy: |
+  Formwork is up. Next:
+
+    cd {{ _copier_conf.dst_path }}
+    git init
+    git add -A
+    git commit -m "Initial commit from copier-formwork"
+  {% if integration_branch == 'dev' %}
+    git branch -M main
+    git checkout -b dev
+  {% endif %}
+    uv sync --extra dev
+    just check
+
+  Open an MR/PR against {{ integration_branch }}. Do not put architecture mermaid in README.
+
+project_name:
+  type: str
+  help: Folder-friendly project name (lowercase, hyphens).
+  default: my-agent-service
+  validator: "{% if not (project_name | regex_search('^[a-z][a-z0-9-]*$')) %}Must be lowercase letters, digits, and hyphens.{% endif %}"
+
+package_name:
+  type: str
+  help: Python import package name.
+  default: "{{ project_name | replace('-', '_') }}"
+  validator: "{% if not (package_name | regex_search('^[a-z][a-z0-9_]*$')) %}Must be a valid Python identifier.{% endif %}"
+
+description:
+  type: str
+  help: One-line description.
+  default: "A well-formed project generated with copier-formwork."
+
+kind:
+  type: str
+  help: What are you building?
+  choices:
+    "Library — an installable Python package": package
+    "Service — an HTTP service with Compose and CI": service
+    "Agent — a CLI/worker with a tool registry": agent
+  default: service
+
+git_host:
+  type: str
+  help: Where will the remote live?
+  choices:
+    "GitLab (merge requests)": gitlab
+    "GitHub (pull requests)": github
+  default: gitlab
+
+integration_branch:
+  type: str
+  help: Feature work is merged into this branch.
+  choices:
+    "Integrate on dev (MR into dev; release into main)": dev
+    "Integrate on main (trunk-based)": main
+  default: dev
+
+runtime:
+  type: str
+  help: How the code is entered at runtime.
+  choices:
+    "Library only": library
+    FastAPI: fastapi
+    CLI: cli
+  default: fastapi
+
+frontend:
+  type: str
+  help: Browser UI (service only). Talks to the API over HTTP; never to the database.
+  choices:
+    "None — API only": none
+    "Vite + TypeScript SPA (already wired to the API)": vite
+  default: "{% if kind == 'service' %}vite{% else %}none{% endif %}"
+  when: "{{ kind == 'service' }}"
+
+database:
+  type: str
+  help: Datastore in Compose (service only). The frontend must not get a connection string.
+  choices:
+    "None": none
+    "PostgreSQL (Docker Compose)": postgres
+  default: "{% if kind == 'service' %}postgres{% else %}none{% endif %}"
+  when: "{{ kind == 'service' }}"
+
+orchestration:
+  type: str
+  help: Agent orchestration library (ignored for a plain package).
+  choices:
+    "None (tools + code)": none
+    "Pydantic AI": pydantic-ai
+    LangGraph: langgraph
+  default: none
+
+evals:
+  type: str
+  help: Evaluation harness.
+  choices:
+    Off: off
+    "Pytest only": pytest
+    "Replay fixtures + pytest": replay
+  default: pytest
+
+observability:
+  type: str
+  help: Tracing (service/agent).
+  choices:
+    "None": none
+    OpenTelemetry: otel
+    Langfuse: langfuse
+  default: none
+
+python_version:
+  type: str
+  help: Python version for the generated project.
+  default: "3.12"
+  choices: ["3.12", "3.13"]
+
+author_name:
+  type: str
+  help: Author name for pyproject.toml.
+  default: "TODO"
+
+_exclude:
+  - "{% if git_host != 'github' %}.github{% endif %}"
+  - "{% if git_host != 'gitlab' %}.gitlab-ci.yml{% endif %}"
+  - "{% if git_host != 'gitlab' %}.gitlab{% endif %}"
+  - "{% if kind != 'service' %}docker-compose.yml{% endif %}"
+  - "{% if kind != 'service' %}Dockerfile{% endif %}"
+  - "{% if kind != 'service' %}.dockerignore{% endif %}"
+  - "{% if kind != 'service' %}.env.example{% endif %}"
+  - "{% if kind != 'service' %}src/{{ package_name }}/api.py{% endif %}"
+  - "{% if kind != 'service' %}src/{{ package_name }}/settings.py{% endif %}"
+  - "{% if kind != 'service' %}src/{{ package_name }}/domain{% endif %}"
+  - "{% if kind != 'service' %}src/{{ package_name }}/adapters{% endif %}"
+  - "{% if kind == 'service' %}src/{{ package_name }}/hello.py{% endif %}"
+  - "{% if kind != 'service' %}tests/test_api.py{% endif %}"
+  - "{% if kind != 'service' %}tests/test_microarchitecture.py{% endif %}"
+  - "{% if database != 'postgres' %}src/{{ package_name }}/adapters/postgres{% endif %}"
+  - "{% if database != 'postgres' %}tests/test_database_compose.py{% endif %}"
+  - "{% if database != 'postgres' %}tests/test_ready.py{% endif %}"
+  - "{% if frontend != 'vite' %}frontend{% endif %}"
+  - "{% if frontend != 'vite' %}tests/test_frontend_boundary.py{% endif %}"
+  - "{% if kind != 'agent' %}src/{{ package_name }}/agent.py{% endif %}"
+  - "{% if kind == 'package' %}src/{{ package_name }}/registry.py{% endif %}"
+  - "{% if kind == 'package' %}src/{{ package_name }}/tools{% endif %}"
+  - "{% if kind == 'package' %}tests/test_registry.py{% endif %}"
+  - "{% if kind == 'package' %}tests/test_tool_echo.py{% endif %}"
+  - "{% if kind != 'agent' %}src/{{ package_name }}/__main__.py{% endif %}"
+  - "{% if evals == 'off' %}tests/evals{% endif %}"

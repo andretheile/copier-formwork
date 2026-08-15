@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Copier Formwork</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --bg-2: #fffdf8;
+      --ink: #1c1914;
+      --muted: #5c574e;
+      --line: #d9d2c5;
+      --accent: #1f5c4d;
+      --accent-soft: #e4f0eb;
+      --warn: #8a4b12;
+      --radius: 12px;
+      --font: "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161410;
+        --bg-2: #1e1b16;
+        --ink: #f3efe6;
+        --muted: #b4ad9f;
+        --line: #3a342b;
+        --accent: #8fbfb0;
+        --accent-soft: #24332e;
+        --warn: #e0a36a;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.45;
+    }
+    .shell {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    header.top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    header.top h1 {
+      font-family: var(--font);
+      font-size: 1.65rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    header.top p { margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+    .stepper {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 0 0 28px;
+    }
+    .stepper button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.78rem;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    .stepper button[aria-current="step"] { color: var(--ink); font-weight: 600; }
+    .stepper button:disabled { cursor: default; opacity: 0.45; }
+    .panel {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    h2 {
+      font-family: var(--font);
+      font-size: 1.35rem;
+      margin: 0 0 8px;
+    }
+    .lede { color: var(--muted); margin: 0 0 22px; }
+    label.field {
+      display: block;
+      margin-bottom: 16px;
+    }
+    label.field span {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      font: inherit;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 640px) {
+      .cards.three { grid-template-columns: 1fr 1fr 1fr; }
+      .cards.two { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      text-align: left;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px 14px 12px;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+    }
+    .card strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
+    .card span { display: block; color: var(--muted); font-size: 0.82rem; }
+    .card[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    details.advanced {
+      margin-top: 8px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+    details.advanced summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .row { display: grid; gap: 12px; margin-top: 12px; }
+    @media (min-width: 640px) {
+      .row.two { grid-template-columns: 1fr 1fr; }
+    }
+    pre.preview {
+      margin: 0;
+      padding: 14px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.78rem;
+      overflow: auto;
+      white-space: pre;
+    }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    button.btn {
+      font: inherit;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+    }
+    button.btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #f7fffb;
+    }
+    @media (prefers-color-scheme: dark) {
+      button.btn.primary { color: #12140f; }
+    }
+    button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .note {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+    }
+    .note.warn { border-left-color: var(--warn); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div>
+        <h1>Copier Formwork</h1>
+        <p>Click through. Copier writes the project when you generate.</p>
+      </div>
+    </header>
+    <nav class="stepper" aria-label="Steps" id="stepper"></nav>
+    <div class="panel" id="panel"></div>
+  </div>
+  <script>
+    const STEPS = ["Welcome", "Name", "Kind", "Git", "Runtime", "Preview", "Done"];
+
+    const state = {
+      step: 0,
+      project_name: "my-agent-service",
+      destination: "~/projects/my-agent-service",
+      kind: "service",
+      git_host: "gitlab",
+      integration_branch: "dev",
+      runtime: "fastapi",
+      frontend: "vite",
+      database: "postgres",
+      orchestration: "none",
+      evals: "pytest",
+      observability: "none",
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function treePreview() {
+      const pkg = state.project_name.replace(/-/g, "_");
+      const lines = [
+        `${state.project_name}/`,
+        "  AGENTS.md",
+        "  README.md",
+        "  justfile",
+        "  pyproject.toml",
+        "  docs/architecture/context.md",
+        "  docs/architecture/runtime.md",
+        "  docs/architecture/data.md",
+        "  docs/decisions/0001-template-defaults.md",
+        "  tests/test_architecture.py",
+      ];
+      if (state.kind !== "package") {
+        lines.push("  tests/test_registry.py");
+      }
+      if (state.git_host === "gitlab") {
+        lines.push("  .gitlab/merge_request_templates/Default.md");
+        lines.push("  .gitlab-ci.yml");
+      } else {
+        lines.push("  .github/pull_request_template.md");
+        lines.push("  .github/workflows/ci.yml");
+        lines.push("  .github/workflows/security.yml");
+      }
+      if (state.kind === "package") {
+        lines.push(`  src/${pkg}/__init__.py`);
+      } else if (state.kind === "service") {
+        lines.push(`  src/${pkg}/api.py`);
+        lines.push(`  src/${pkg}/domain/hello.py`);
+        lines.push(`  src/${pkg}/adapters/http/router.py`);
+        lines.push("  Dockerfile");
+        lines.push("  docker-compose.yml");
+        if (state.frontend === "vite") {
+          lines.push("  frontend/src/api.ts");
+          lines.push("  frontend/Dockerfile");
+        }
+        if (state.database === "postgres") {
+          lines.push(`  src/${pkg}/adapters/postgres/ping.py`);
+        }
+      } else {
+        lines.push(`  src/${pkg}/agent.py`);
+        lines.push("  tests/evals/replay/");
+      }
+      return lines.join("\n");
+    }
+
+    function answersYaml() {
+      return [
+        `# Copier answers — keep this file; copier update needs it`,
+        `project_name: ${state.project_name}`,
+        `kind: ${state.kind}`,
+        `git_host: ${state.git_host}`,
+        `integration_branch: ${state.integration_branch}`,
+        `runtime: ${state.kind === "package" ? "library" : state.runtime}`,
+        `frontend: ${state.kind === "service" ? state.frontend : "none"}`,
+        `database: ${state.kind === "service" ? state.database : "none"}`,
+        `orchestration: ${state.orchestration}`,
+        `evals: ${state.evals}`,
+        `observability: ${state.observability}`,
+      ].join("\n");
+    }
+
+    function card(group, value, title, blurb) {
+      const on = state[group] === value;
+      return `<button type="button" class="card" aria-pressed="${on}" data-group="${group}" data-value="${value}">
+        <strong>${title}</strong><span>${blurb}</span>
+      </button>`;
+    }
+
+    function renderStepper() {
+      $("stepper").innerHTML = STEPS.map((name, i) => {
+        const current = i === state.step ? `aria-current="step"` : "";
+        const disabled = i > state.step ? "disabled" : "";
+        return `<button type="button" data-goto="${i}" ${current} ${disabled}>${i + 1} ${name}</button>`;
+      }).join("");
+    }
+
+    function view() {
+      switch (state.step) {
+        case 0:
+          return `
+            <h2>A project with the boring parts already decided</h2>
+            <p class="lede">CI, tests, architecture docs, and merge requests against <code>dev</code> are included. A service starts as a modular monolith: browser, API, and database stay separate so the product can grow.</p>
+            <p class="note">You are filling Copier answers. Generate writes a real folder on this machine. Opening the HTML as a file still lets you click through and download answers.</p>`;
+        case 1:
+          return `
+            <h2>What should it be called?</h2>
+            <p class="lede">Use a folder-friendly name. You can change the path in the helper later.</p>
+            <label class="field"><span>Project name</span>
+              <input type="text" id="project_name" value="${escapeAttr(state.project_name)}" autocomplete="off" />
+            </label>
+            <label class="field"><span>Destination folder (must be empty or new)</span>
+              <input type="text" id="destination" value="${escapeAttr(state.destination)}" autocomplete="off" />
+            </label>`;
+        case 2:
+          return `
+            <h2>What are you building?</h2>
+            <p class="lede">This changes the layout, CI, and docs — not just a label.</p>
+            <div class="cards three">
+              ${card("kind", "package", "Library", "An installable Python package. No HTTP server.")}
+              ${card("kind", "service", "Service", "Modular API (domain + adapters), Compose, optional SPA and Postgres.")}
+              ${card("kind", "agent", "Agent", "A CLI or worker agent with a tool registry and eval replay.")}
+            </div>`;
+        case 3:
+          return `
+            <h2>How should git work?</h2>
+            <p class="lede">Feature work always goes through a merge request. Direct pushes to <code>dev</code> or <code>main</code> are not part of the template.</p>
+            <div class="cards two">
+              ${card("git_host", "gitlab", "GitLab", "Merge requests. Default wording in AGENTS.md.")}
+              ${card("git_host", "github", "GitHub", "Pull requests. Same rules, different files.")}
+            </div>
+            <div class="cards two" style="margin-top:10px">
+              ${card("integration_branch", "dev", "Integrate on dev", "Recommended. MR into dev; release MR into main.")}
+              ${card("integration_branch", "main", "Integrate on main", "Trunk-based. PRs go to main. Typical for public OSS.")}
+            </div>`;
+        case 4:
+          return `
+            <h2>How should it run?</h2>
+            ${state.kind === "service" ? `
+            <p class="lede">The browser talks to FastAPI over HTTP. Postgres stays behind the API. Inside the API, domain stays off HTTP and SQL. Compose is how you run the set.</p>
+            <p class="note">Recommended for a service: Vite SPA + Postgres in Compose. The frontend client is <code>frontend/src/api.ts</code>.</p>
+            <div class="cards two">
+              ${card("frontend", "vite", "Vite + TypeScript", "SPA already calling /health and /hello. Vite proxies /api in dev; nginx in Compose.")}
+              ${card("frontend", "none", "API only", "No browser app. You can add a client later; keep it off the database.")}
+            </div>
+            <div class="cards two" style="margin-top:10px">
+              ${card("database", "postgres", "PostgreSQL", "Compose runs Postgres. FastAPI /ready pings it. No connection string in the frontend.")}
+              ${card("database", "none", "No database", "Stateless API. Add a store later in the backend only.")}
+            </div>
+            ` : `
+            <p class="lede">Recommended defaults are enough. Open Advanced only if you already know you need a specific stack.</p>
+            <p class="note">Recommended: FastAPI for a service, pytest only, no extra tracing. You can change this later with Copier updates.</p>
+            `}
+            <details class="advanced">
+              <summary>Advanced</summary>
+              <div class="row two">
+                <label class="field"><span>Runtime</span>
+                  <select id="runtime">
+                    <option value="library" ${state.runtime === "library" ? "selected" : ""}>Library only</option>
+                    <option value="fastapi" ${state.runtime === "fastapi" ? "selected" : ""}>FastAPI</option>
+                    <option value="cli" ${state.runtime === "cli" ? "selected" : ""}>CLI</option>
+                  </select>
+                </label>
+                <label class="field"><span>Orchestration</span>
+                  <select id="orchestration">
+                    <option value="none" ${state.orchestration === "none" ? "selected" : ""}>None (tools + code)</option>
+                    <option value="pydantic-ai" ${state.orchestration === "pydantic-ai" ? "selected" : ""}>Pydantic AI</option>
+                    <option value="langgraph" ${state.orchestration === "langgraph" ? "selected" : ""}>LangGraph</option>
+                  </select>
+                </label>
+                <label class="field"><span>Evals</span>
+                  <select id="evals">
+                    <option value="off" ${state.evals === "off" ? "selected" : ""}>Off</option>
+                    <option value="pytest" ${state.evals === "pytest" ? "selected" : ""}>Pytest only</option>
+                    <option value="replay" ${state.evals === "replay" ? "selected" : ""}>Replay + pytest</option>
+                  </select>
+                </label>
+                <label class="field"><span>Observability</span>
+                  <select id="observability">
+                    <option value="none" ${state.observability === "none" ? "selected" : ""}>None</option>
+                    <option value="otel" ${state.observability === "otel" ? "selected" : ""}>OpenTelemetry</option>
+                    <option value="langfuse" ${state.observability === "langfuse" ? "selected" : ""}>Langfuse</option>
+                  </select>
+                </label>
+              </div>
+            </details>`;
+        case 5:
+          return `
+            <h2>This is what you will get</h2>
+            <p class="lede">Same answers the CLI would write. Architecture mermaid lives under <code>docs/architecture/</code>, not in the README.</p>
+            <pre class="preview">${escapeHtml(treePreview())}</pre>
+            <p class="note">After generate: <code>git init</code>, branch <code>dev</code>, then <code>just check</code>. Open an MR against ${state.integration_branch}.</p>`;
+        case 6:
+          return `
+            <h2>Answers ready</h2>
+            <p class="lede">Download these and keep them as <code>.copier-answers.yml</code> so the project can be updated later.</p>
+            <pre class="preview">${escapeHtml(answersYaml())}</pre>
+            <p class="note warn" id="server-note"></p>`;
+        default:
+          return "";
+      }
+    }
+
+    function actions() {
+      const back = state.step === 0
+        ? `<span></span>`
+        : `<button type="button" class="btn" data-nav="-1">Back</button>`;
+      let nextLabel = "Continue";
+      if (state.step === STEPS.length - 2) nextLabel = "Confirm";
+      if (state.step === STEPS.length - 1) {
+        return `<div class="actions">
+          ${back}
+          <div>
+            <button type="button" class="btn" id="download">Download answers</button>
+            <button type="button" class="btn primary" id="generate">Generate project</button>
+          </div>
+        </div>`;
+      }
+      return `<div class="actions">${back}<button type="button" class="btn primary" data-nav="1">${nextLabel}</button></div>`;
+    }
+
+    function readFields() {
+      const name = $("panel").querySelector("#project_name");
+      const dest = $("panel").querySelector("#destination");
+      if (name) {
+        state.project_name = name.value.trim() || state.project_name;
+        state.destination = dest.value.trim() || `~/${state.project_name}`;
+      }
+      ["runtime", "orchestration", "evals", "observability"].forEach((id) => {
+        const el = $("panel").querySelector("#" + id);
+        if (el) state[id] = el.value;
+      });
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/"/g, "&quot;");
+    }
+
+    function paint() {
+      renderStepper();
+      $("panel").innerHTML = view() + actions();
+      if (state.step === 6) {
+        const served = location.protocol === "http:" || location.protocol === "https:";
+        const note = $("panel").querySelector("#server-note");
+        note.textContent = served
+          ? "This page is served locally. Generate will call Copier on this machine (127.0.0.1 only)."
+          : "You opened this as a file. Generate cannot write a folder from the browser. Use the local helper, or download the answers and run Copier yourself.";
+        $("panel").querySelector("#generate").disabled = !served;
+      }
+    }
+
+    function downloadAnswers() {
+      const blob = new Blob([answersYaml() + "\n"], { type: "text/yaml" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = ".copier-answers.yml";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    async function generate() {
+      const btn = $("panel").querySelector("#generate");
+      btn.disabled = true;
+      btn.textContent = "Generating…";
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(state),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        $("panel").querySelector("#server-note").textContent =
+          "Created " + data.path + ". Next: git init, branch from " + state.integration_branch + ", uv sync --extra dev, just check. Open the folder in Cursor.";
+        btn.textContent = "Done";
+      } catch (err) {
+        $("panel").querySelector("#server-note").textContent = String(err.message || err);
+        btn.textContent = "Generate project";
+        btn.disabled = false;
+      }
+    }
+
+    document.body.addEventListener("click", (e) => {
+      const goto = e.target.closest("[data-goto]");
+      if (goto && !goto.disabled) {
+        readFields();
+        state.step = Number(goto.dataset.goto);
+        paint();
+        return;
+      }
+      const nav = e.target.closest("[data-nav]");
+      if (nav) {
+        readFields();
+        state.step = Math.min(STEPS.length - 1, Math.max(0, state.step + Number(nav.dataset.nav)));
+        paint();
+        return;
+      }
+      const cardEl = e.target.closest(".card");
+      if (cardEl) {
+        state[cardEl.dataset.group] = cardEl.dataset.value;
+        if (state.kind !== "service") {
+          state.frontend = "none";
+          state.database = "none";
+        } else if (cardEl.dataset.group === "kind") {
+          state.frontend = "vite";
+          state.database = "postgres";
+          state.runtime = "fastapi";
+        }
+        paint();
+        return;
+      }
+      if (e.target.id === "download") downloadAnswers();
+      if (e.target.id === "generate") generate();
+    });
+
+    paint();
+  </script>
+</body>
+</html>

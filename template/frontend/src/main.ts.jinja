@@ -1,0 +1,47 @@
+import { getHealth, getHello } from "./api";
+
+const app = document.querySelector<HTMLDivElement>("#app");
+if (!app) {
+  throw new Error("#app missing");
+}
+
+app.innerHTML = `
+  <main>
+    <h1>{{ project_name }}</h1>
+    <p>This page calls the FastAPI backend. It does not talk to Postgres.</p>
+    <label>
+      Name
+      <input id="name" type="text" value="formwork" />
+    </label>
+    <p>
+      <button id="hello" type="button">Call /hello</button>
+    </p>
+    <pre id="out">Loading /health…</pre>
+  </main>
+`;
+
+const out = document.querySelector<HTMLPreElement>("#out");
+const nameInput = document.querySelector<HTMLInputElement>("#name");
+const helloBtn = document.querySelector<HTMLButtonElement>("#hello");
+
+async function showHealth(): Promise<void> {
+  if (!out) return;
+  try {
+    const health = await getHealth();
+    out.textContent = JSON.stringify(health, null, 2);
+  } catch (err) {
+    out.textContent = String(err);
+  }
+}
+
+helloBtn?.addEventListener("click", async () => {
+  if (!out) return;
+  try {
+    const hello = await getHello(nameInput?.value || "formwork");
+    out.textContent = JSON.stringify(hello, null, 2);
+  } catch (err) {
+    out.textContent = String(err);
+  }
+});
+
+void showHealth();

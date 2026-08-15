@@ -1,0 +1,44 @@
+# {{ project_name }}
+
+{{ description }}
+
+## Quick start
+
+```bash
+uv sync --extra dev
+just check
+```
+
+{% if kind == 'service' %}
+```bash
+uv run uvicorn {{ package_name }}.api:app --reload
+```
+{% if frontend == 'vite' %}
+```bash
+just web
+```
+{% endif %}
+```bash
+just up
+```
+{% elif kind == 'agent' %}
+```bash
+uv run python -m {{ package_name }} "hello"
+```
+{% else %}
+```bash
+uv run python -c "from {{ package_name }} import hello; print(hello())"
+```
+{% endif %}
+
+## Documentation
+
+Human and agent maps live in [docs/](docs/README.md). Architecture mermaid is only under `docs/architecture/`. Do not add a root `ARCHITECTURE.md`.
+
+## Git
+
+Feature work goes through a {{ 'merge request' if git_host == 'gitlab' else 'pull request' }} into **{{ integration_branch }}**. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).

@@ -1,0 +1,25 @@
+set dotenv-load := false
+
+check:
+    uv run ruff format --check src tests
+    uv run ruff check src tests
+    uv run pytest
+
+fmt:
+    uv run ruff format src tests
+    uv run ruff check --fix src tests
+
+test:
+    uv run pytest -q
+
+eval:
+    uv run pytest tests/evals -q
+{% if kind == 'service' %}
+up:
+    docker compose up --build
+{% if frontend == 'vite' %}
+web:
+    npm --prefix frontend install
+    npm --prefix frontend run dev
+{% endif %}
+{% endif %}
